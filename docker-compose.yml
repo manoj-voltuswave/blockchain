@@ -1,0 +1,98 @@
+services:
+  geth-node1:
+    image: ethereum/client-go:v1.13.15
+    container_name: geth-node1
+    restart: unless-stopped
+    ports:
+      - "30311:30303/tcp"
+      - "30311:30303/udp"
+    volumes:
+      - ./nodes/node1/data:/root/.ethereum
+      - ./nodes/node1/password.txt:/root/password.txt:ro
+      - ./nodes/node1/config.toml:/root/config.toml:ro
+    command:
+      - "--config=/root/config.toml"
+      - "--networkid=1234567"
+      - "--syncmode=full"
+      - "--gcmode=archive"
+      - "--port=30303"
+      - "--nat=extip:172.25.0.101"
+      - "--unlock=0xd545dcc1e15cd1f33ede6bf2b251b7b7b1094131"
+      - "--password=/root/password.txt"
+      - "--mine"
+      - "--miner.etherbase=0xd545dcc1e15cd1f33ede6bf2b251b7b7b1094131"
+      - "--allow-insecure-unlock"
+      - "--verbosity=3"
+    networks:
+      geth-network:
+        ipv4_address: 172.25.0.101
+
+  geth-node2:
+    image: ethereum/client-go:v1.13.15
+    container_name: geth-node2
+    restart: unless-stopped
+    ports:
+      - "30312:30303/tcp"
+      - "30312:30303/udp"
+    volumes:
+      - ./nodes/node2/data:/root/.ethereum
+      - ./nodes/node2/password.txt:/root/password.txt:ro
+      - ./nodes/node2/config.toml:/root/config.toml:ro
+    command:
+      - "--config=/root/config.toml"
+      - "--networkid=1234567"
+      - "--syncmode=full"
+      - "--gcmode=archive"
+      - "--port=30303"
+      - "--nat=extip:172.25.0.102"
+      - "--unlock=0x3e72634626da0949e156a6bb201420839ef54703"
+      - "--password=/root/password.txt"
+      - "--mine"
+      - "--miner.etherbase=0x3e72634626da0949e156a6bb201420839ef54703"
+      - "--allow-insecure-unlock"
+      - "--verbosity=3"
+    networks:
+      geth-network:
+        ipv4_address: 172.25.0.102
+
+  geth-rpc-node:
+    image: ethereum/client-go:v1.13.15
+    container_name: geth-rpc-node
+    restart: unless-stopped
+    ports:
+      - "8545:8545/tcp"
+      - "8546:8546/tcp"
+      - "30313:30303/tcp"
+      - "30313:30303/udp"
+    volumes:
+      - ./nodes/node3/data:/root/.ethereum
+      - ./nodes/node3/config.toml:/root/config.toml:ro
+    command:
+      - "--config=/root/config.toml"
+      - "--networkid=1234567"
+      - "--syncmode=full"
+      - "--gcmode=archive"
+      - "--port=30303"
+      - "--nat=extip:172.25.0.103"
+      - "--http"
+      - "--http.addr=0.0.0.0"
+      - "--http.port=8545"
+      - "--http.api=eth,net,web3,txpool,debug,personal"
+      - "--http.corsdomain=*"
+      - "--http.vhosts=*"
+      - "--ws"
+      - "--ws.addr=0.0.0.0"
+      - "--ws.port=8546"
+      - "--ws.api=eth,net,web3,txpool,debug"
+      - "--ws.origins=*"
+      - "--verbosity=3"
+    networks:
+      geth-network:
+        ipv4_address: 172.25.0.103
+
+networks:
+  geth-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/24
